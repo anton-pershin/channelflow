@@ -59,7 +59,7 @@ A complete installation, with all features enabled, might look like this:
 
 ### Compilation on ARC3/ARC4
 
-The fork of Channelflow accounting for ARC4 peculiarities is hosted on [GitHub](https://github.com/anton-pershin/channelflow.git)
+The fork of Channelflow accounting for ARC4 peculiarities is hosted on https://github.com/anton-pershin/channelflow.git
 
 Before compiling, one needs to load the gnu compiler (there were certain issues found while trying the intel one), cmake building tool and openmpi, fftw and netcdf libraries:
 ```
