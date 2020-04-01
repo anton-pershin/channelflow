@@ -57,6 +57,39 @@ A complete installation, with all features enabled, might look like this:
 
   `cmake PATH_TO_SOURCE -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=$HOME/usr -DWITH_PYTHON=ON -DWITH_HDF5CXX=ON`
 
+### Compilation on ARC3/ARC4
+
+The fork of Channelflow accounting for ARC4 peculiarities is hosted on [GitHub](https://github.com/anton-pershin/channelflow.git)
+
+Before compiling, one needs to load the gnu compiler (there were certain issues found while trying the intel one), cmake building tool and openmpi, fftw and netcdf libraries:
+```
+module switch intel/19.0.4 gnu/native
+module load cmake/3.15.1
+module load openmpi/3.1.4
+module load fftw/3.3.8
+module load netcdf/4.6.3
+```
+
+Since no eigen module is available on ARC3/ARC4, one needs to clone this library manually from https://gitlab.com/libeigen/eigen and pass the header path to cmake command via `-DEIGEN3_INCLUDE_DIR`.
+
+Eventually, building commands may look like this (here we disabled HDF5 and enabled MPI):
+```
+mkdir build
+cd build
+cmake -DCMAKE_CXX_COMPILER=mpicxx -DEIGEN3_INCLUDE_DIR=/path/to/eigen3/includes ..
+make -j
+```
+
+Given that new version of Channelflow makes use of NetCDF4, one may want to use nco tools to perform operations on .nc files (e.g., glue separate .nc files in a single one which is useful when a series of files represents a time series). Since there is no nco package on ARC4, one needs to clone nco from the repository and then compile it:
+```
+git clone https://github.com/nco/nco.git
+module switch intel/19.0.4 gnu/native
+module load cmake/3.15.1
+module load netcdf/4.6.3
+module load hdf5/1.8.21
+cd nco && mkdir build && cd build && cmake -DNETCDF_INCLUDE=/apps/developers/libraries/netcdf/4.6.3/1/gnu-native-openmpi-3.1.4/include -DNETCDF_LIBRARY=/apps/developers/libraries/netcdf/4.6.3/1/gnu-native-openmpi-3.1.4/lib/libnetcdf.so -DHDF5_LIBRARY=/apps/developers/libraries/hdf5/1.8.21/1/gnu-native-openmpi-3.1.4/lib/libhdf5.so -DHDF5_HL_LIBRARY=/apps/developers/libraries/hdf5/1.8.21/1/gnu-native-openmpi-3.1.4/lib/libhdf5_hl.so ..
+make -j
+```
 
 ### Tests
 
@@ -107,3 +140,13 @@ The following example simulates a pressure driven (-dPds) Poiseuille flow (-Uwal
 a 1st order forward-backward euler scheme as initial time stepping algorithm (-is).
 
 `simulateflow -R 1000 -Uwall 0 -dPds -0.002 -is SBDF1 newfield.nc`
+
+### Running simulations on ARC3/ARC4
+
+Below is an example of the script for qsub running a time-integration employing 24 cores for maximum 12 hours (note `mpirun` before the command):
+```
+#$ -cwd -V
+#$ -l h_rt=12:00:00
+#$ -pe ib 24
+mpirun /path/to/channelflow/programs/simulateflow -T0 0 -T 3000 -dT 0.5 -s 10 -R 250 -dt 0.004 -o data initial_condition.nc
+```
