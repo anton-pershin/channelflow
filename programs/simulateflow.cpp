@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
         const Real umin = args.getreal("-u", "--umin", 0.0, "stop if chebyNorm(u) < umin");
 
         const Real ecfmin = args.getreal("-e", "--ecfmin", 0.0, "stop if Ecf(u) < ecfmin");
+        const Real kemin  = args.getreal("-ke", "--kemin",  0.0,  "stop if maxPointwiseKE(u) < kemin");
         const int saveint = args.getint("-s", "--saveinterval", 1, "save fields every s dT");
 
         const int nproc0 =
@@ -66,6 +67,8 @@ int main(int argc, char* argv[]) {
         args.check();
         args.save("./");
         mkdir(outdir);
+        const string xyavg_energy_outdir = outdir + "xyavg_energy/";
+        mkdir(xyavg_energy_outdir);
         args.save(outdir);
         flags.save(outdir);
 
@@ -87,6 +90,8 @@ int main(int argc, char* argv[]) {
             (abs(saveint * dt.dT() - int(saveint * dt.dT())) < 1e-12) && (abs(flags.t0 - int(flags.t0)) < 1e-12)
                 ? true
                 : false;
+
+        const bool inttime_for_xyavg_energy = (abs(dt.dT() - int(dt.dT())) < 1e-12) ? true : false;
 
         cout << "Uwall == " << flags.uupperwall << endl;
         cout << "Wwall == " << flags.wupperwall << endl;
@@ -121,6 +126,17 @@ int main(int argc, char* argv[]) {
             if (ecfmin > 0 && Ecf(fields[0]) < ecfmin) {
                 cferror("Ecf < ecfmin == " + r2s(ecfmin) + ", exiting");
             }
+
+            FlowField energy_;
+            energy(fields[0], energy_);
+            FlowField xyavg_energy = xyavg(energy_);
+            xyavg_energy.save(xyavg_energy_outdir + t2s(t, inttime_for_xyavg_energy));
+
+            Real curMaxKE = LinfNorm(energy_);
+            if (kemin > 0 && curMaxKE < kemin) {
+                cferror("Ecf < ecfmin == " + r2s(ecfmin) + ", exiting");
+            }
+
 
             cout << s;
             // fields[0] += dns.Ubase(); //////////////////// ONLY
