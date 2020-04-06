@@ -2700,7 +2700,7 @@ FlowField xyavg(FlowField& u) {
     // const Real a = u.a();
     // const Real b = u.b();
 
-    FlowField uxyavg(4, 1, Nz, Nd, u.Lx(), u.Lz(), u.a(), u.b(), u.cfmpi());
+    FlowField uxyavg(1, 1, Nz, Nd, u.Lx(), u.Lz(), u.a(), u.b(), u.cfmpi());
     u.makeSpectral();
 
     for (int i = 0; i < Nd; ++i)
