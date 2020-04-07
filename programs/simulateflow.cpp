@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
         const Real umin = args.getreal("-u", "--umin", 0.0, "stop if chebyNorm(u) < umin");
 
         const Real ecfmin = args.getreal("-e", "--ecfmin", 0.0, "stop if Ecf(u) < ecfmin");
-        const Real kemin  = args.getreal("-ke", "--kemin",  0.0,  "stop if maxPointwiseKE(u) < kemin");
+//        const Real kemin  = args.getreal("-ke", "--kemin",  0.0,  "stop if maxPointwiseKE(u) < kemin");
         const int saveint = args.getint("-s", "--saveinterval", 1, "save fields every s dT");
 
         const int nproc0 =
@@ -132,11 +132,19 @@ int main(int argc, char* argv[]) {
             FlowField xyavg_energy = xyavg(energy_);
             xyavg_energy.save(xyavg_energy_outdir + t2s(t, inttime_for_xyavg_energy));
 
-            Real curMaxKE = LinfNorm(energy_);
-            if (kemin > 0 && curMaxKE < kemin) {
-                cferror("Ecf < ecfmin == " + r2s(ecfmin) + ", exiting");
-            }
-
+//            Real curMaxKE = 0;
+//            energy_.makePhysical();
+//            for (int ny = 0; ny < energy_.Ny(); ++ny) {
+//                for (int nx = 0; nx < energy_.Nx(); ++nx) {
+//                    for (int nz = 0; nz < energy_.Nz(); ++nz) {
+//                        curMaxKE = max(curMaxKE, energy_(nx, ny, nz, 0));
+//                    }
+//                }
+//            }
+//            cout << "curMaxKE == " << curMaxKE << endl << endl;
+//            if (kemin > 0 && curMaxKE < kemin) {
+//                cferror("Ecf < ecfmin == " + r2s(ecfmin) + ", exiting");
+//            }
 
             cout << s;
             // fields[0] += dns.Ubase(); //////////////////// ONLY
